@@ -1,0 +1,48 @@
+
+{% extends 'billing/base.html' %}
+
+{% block content %}
+<h2>Subscriber List</h2>
+
+<form method="get" class="mb-3 row g-3">
+  <div class="col-auto">
+    <select name="q" class="form-select">
+      <option value="">-- Filter by Barangay --</option>
+      {% for barangay in barangays %}
+        <option value="{{ barangay }}" {% if query == barangay %}selected{% endif %}>
+          {{ barangay }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">Filter</button>
+  </div>
+</form>
+
+
+<a href="{% url 'add_subscriber' %}" class="btn btn-success mb-3">➕ Add New Subscriber</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Barangay</th>
+            <th>Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for subscriber in subscribers %}
+        <tr>
+            <td>{{ subscriber.name }}</td>
+            <td>{{ subscriber.barangay }}</td>
+            <td>{{ subscriber.address }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="text-center">No subscribers found for "{{ query }}"</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
