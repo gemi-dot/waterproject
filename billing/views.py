@@ -1,5 +1,6 @@
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404, redirect
+
 from .forms import SubscriberForm, WaterBillForm
 from .models import Subscriber, WaterBill
 from django.db.models import Q
@@ -12,7 +13,33 @@ def add_subscriber(request):
             return redirect('subscriber_list')
     else:
         form = SubscriberForm()
-    return render(request, 'billing/add_subscriber.html', {'form': form})
+ #   return render(request, 'billing/add_subscriber.html', {'form': form})
+    return render(request, 'billing/subscriber_form.html', {'form': form})
+
+
+def edit_subscriber(request, pk):
+    subscriber = get_object_or_404(Subscriber, pk=pk)
+    
+    if request.method == 'POST':
+        form = SubscriberForm(request.POST, instance=subscriber)
+        if form.is_valid():
+            form.save()
+            return redirect('subscriber_list')
+    else:
+        form = SubscriberForm(instance=subscriber)
+
+    #return render(request, 'billing/edit_subscriber.html', {'form': form})
+    return render(request, 'billing/subscriber_form.html', {'form': form})
+
+
+def delete_subscriber(request, pk):
+    subscriber = get_object_or_404(Subscriber, pk=pk)
+    if request.method == 'POST':
+        subscriber.delete()
+        return redirect('subscriber_list')
+    return render(request, 'billing/confirm_delete.html', {'subscriber': subscriber})
+
+
 
 def subscriber_list(request):
     query = request.GET.get('q')

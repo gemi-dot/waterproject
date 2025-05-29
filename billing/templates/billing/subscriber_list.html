@@ -20,7 +20,6 @@
   </div>
 </form>
 
-
 <a href="{% url 'add_subscriber' %}" class="btn btn-success mb-3">➕ Add New Subscriber</a>
 
 <table class="table table-bordered">
@@ -29,6 +28,7 @@
             <th>Name</th>
             <th>Barangay</th>
             <th>Address</th>
+            <th>Actions</th>  <!-- Added this -->
         </tr>
     </thead>
     <tbody>
@@ -37,10 +37,15 @@
             <td>{{ subscriber.name }}</td>
             <td>{{ subscriber.barangay }}</td>
             <td>{{ subscriber.address }}</td>
+            <td>
+              <a href="{% url 'edit_subscriber' subscriber.pk %}" class="btn btn-sm btn-warning">✏️ Edit</a>
+              <a href="{% url 'delete_subscriber' subscriber.pk %}" class="btn btn-sm btn-danger"
+                 onclick="return confirm('Are you sure you want to delete this subscriber?');">🗑️ Delete</a>
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="3" class="text-center">No subscribers found for "{{ query }}"</td>
+            <td colspan="4" class="text-center">No subscribers found for "{{ query }}"</td> <!-- colspan updated -->
         </tr>
         {% endfor %}
     </tbody>
