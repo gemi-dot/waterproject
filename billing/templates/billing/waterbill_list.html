@@ -1,26 +1,45 @@
 {% extends 'billing/base.html' %}
 
 {% block content %}
-<h2>Water Bill List</h2>
-<a href="{% url 'add_water_bill' %}" class="btn btn-success mb-3">➕ Add Water Bill</a>
-<table class="table table-striped">
-    <thead>
+<div class="container mt-4">
+  <h2>Water Bills</h2>
+  <a href="{% url 'add_water_bill' %}" class="btn btn-success mb-3">Add New Bill</a>
+
+  {% if bills %}
+    <table class="table table-striped table-bordered">
+      <thead class="table-dark">
         <tr>
-            <th>Subscriber</th>
-            <th>Month</th>
-            <th>Amount Due</th>
-            <th>Due Date</th>
+          <th>Subscriber</th>
+          <th>Billing Month</th>
+          <th>Consumption (m³)</th>
+          <th>Amount Due</th>
+          <th>Due Date</th>
+          <th>Actions</th>
         </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
         {% for bill in bills %}
-        <tr>
-            <td>{{ bill.subscriber.name }}</td>
+          <tr>
+            <td>{{ bill.subscriber }}</td>
             <td>{{ bill.billing_month }}</td>
-            <td>₱{{ bill.amount_due }}</td>
+            <td>{{ bill.consumption }}</td>
+            <td>{{ bill.amount_due }}</td>
             <td>{{ bill.due_date }}</td>
-        </tr>
+            <td>
+            
+              <a href="{% url 'edit_water_bill' bill.pk %}">Edit</a>   {# ✅ Correct #}
+
+
+              <a href="{% url 'delete_water_bill' bill.pk %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">No water bills found.</td></tr>
         {% endfor %}
-    </tbody>
-</table>
+      </tbody>
+    </table>
+  {% else %}
+    <p>No water bills found.</p>
+  {% endif %}
+</div>
 {% endblock %}

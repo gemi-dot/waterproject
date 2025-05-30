@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect  # ← Add this line
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', lambda request: redirect('subscriber_list')),  # ← Default homepage
     path('', include('billing.urls')),  # ← add this line
 ]

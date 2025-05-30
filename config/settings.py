@@ -40,7 +40,10 @@ INSTALLED_APPS = [
     'billing',  # ← Add this line
 
     'widget_tweaks',
+  
+    'django_extensions',
 ]
+
 
 
 

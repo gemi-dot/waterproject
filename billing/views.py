@@ -5,6 +5,16 @@ from .forms import SubscriberForm, WaterBillForm
 from .models import Subscriber, WaterBill
 from django.db.models import Q
 
+from decimal import Decimal
+
+from .models import SubscriberLedger
+from .forms import SubscriberLedgerForm
+
+
+def home(request):
+    return render(request, 'billing/home.html')
+
+
 def add_subscriber(request):
     if request.method == 'POST':
         form = SubscriberForm(request.POST)
@@ -40,7 +50,6 @@ def delete_subscriber(request, pk):
     return render(request, 'billing/confirm_delete.html', {'subscriber': subscriber})
 
 
-
 def subscriber_list(request):
     query = request.GET.get('q')
     barangays = Subscriber.objects.values_list('barangay', flat=True).distinct().order_by('barangay')
@@ -62,12 +71,74 @@ def add_water_bill(request):
     if request.method == 'POST':
         form = WaterBillForm(request.POST)
         if form.is_valid():
-            form.save()
+            water_bill = form.save(commit=False)
+            # Use Decimal for monetary calculation
+            rate_per_cubic_meter = Decimal('15.0')
+            water_bill.amount_due = water_bill.consumption * rate_per_cubic_meter
+            water_bill.save()
             return redirect('waterbill_list')
     else:
         form = WaterBillForm()
-    return render(request, 'billing/add_water_bill.html', {'form': form})
+    
+    context = {
+        'form': form,
+        'form_title': 'Add Water Bill',
+    }
+    return render(request, 'billing/add_water_bill.html', context)
+
+
+def edit_water_bill(request, pk):
+    water_bill = get_object_or_404(WaterBill, pk=pk)
+    if request.method == 'POST':
+        form = WaterBillForm(request.POST, instance=water_bill)
+        if form.is_valid():
+            water_bill = form.save(commit=False)
+            rate_per_cubic_meter = Decimal('15.0')
+            water_bill.amount_due = water_bill.consumption * rate_per_cubic_meter
+            water_bill.save()
+            return redirect('waterbill_list')
+    else:
+        form = WaterBillForm(instance=water_bill)
+    
+    context = {
+        'form': form,
+        'form_title': 'Edit Water Bill',
+    }
+    return render(request, 'billing/add_water_bill.html', context)
+
+
+
+
+def delete_water_bill(request, pk):
+    bill = get_object_or_404(WaterBill, pk=pk)
+
+    if request.method == 'POST':
+        bill.delete()
+        return redirect('waterbill_list')
+
+    return render(request, 'billing/confirm_delete.html', {
+        'object': bill,
+        'type': 'Water Bill',
+    })
+
+
 
 def waterbill_list(request):
-    bills = WaterBill.objects.select_related('subscriber').all()
+    bills = WaterBill.objects.all().order_by('-billing_month')
     return render(request, 'billing/waterbill_list.html', {'bills': bills})
+
+
+
+def ledger_list(request):
+    ledgers = SubscriberLedger.objects.select_related('subscriber', 'water_bill').order_by('-date_paid')
+    return render(request, 'billing/ledger_list.html', {'ledgers': ledgers})
+
+def add_ledger_entry(request):
+    if request.method == 'POST':
+        form = SubscriberLedgerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('ledger_list')
+    else:
+        form = SubscriberLedgerForm()
+    return render(request, 'billing/ledger_form.html', {'form': form, 'form_title': 'Add Payment'})
