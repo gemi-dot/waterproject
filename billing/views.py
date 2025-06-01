@@ -132,52 +132,25 @@ def subscriber_ledger(request, subscriber_id):
     return render(request, 'billing/ledger_list.html', {'subscriber': subscriber, 'bills': bills})
 
 
-def grouped_ledger_view(request):
-    ledgers = SubscriberLedger.objects.select_related('subscriber', 'water_bill').order_by('subscriber__name', '-date_paid')
-
-    # Group entries by subscriber
-    grouped_ledgers = {}
-    for ledger in ledgers:
-        subscriber = ledger.subscriber
-        if subscriber not in grouped_ledgers:
-            grouped_ledgers[subscriber] = []
-        grouped_ledgers[subscriber].append(ledger)
-
-    return render(request, 'billing/ledger_grouped.html', {'grouped_ledgers': grouped_ledgers})
-
 
 def grouped_ledger_view(request):
-    grouped_data = (
-        SubscriberLedger.objects
-        .values('subscriber__id', 'subscriber__name')
-        .annotate(total_paid=Sum('amount_paid'))
-        .order_by('subscriber__name')
-    )
-    return render(request, 'billing/grouped_ledger.html', {'grouped_data': grouped_data})
+    # Get all subscribers with their payments
+    subscribers = SubscriberLedger.objects.select_related('subscriber').order_by('subscriber__name', '-date_paid')
 
-
-def grouped_ledger_view(request):
-    # Get grouped ledger data by subscriber
-    raw_data = SubscriberLedger.objects.values(
-        'subscriber__id', 'subscriber__name'
-    ).annotate(
-        total_amount=Sum('amount_paid')
-    ).order_by('subscriber__name')
-
-    # Rename keys to clean names for the template
-    grouped_data = [
-        {
-            'id': item['subscriber__id'],
-            'name': item['subscriber__name'],
-            'total_amount': item['total_amount']
-        }
-        for item in raw_data
-    ]
+    # Group payments by subscriber id
+    from itertools import groupby
+    # groupby requires the list to be sorted by subscriber id
+    subscribers = sorted(subscribers, key=lambda x: x.subscriber.id)
+    
+    grouped_data = []
+    for subscriber_id, payments in groupby(subscribers, key=lambda x: x.subscriber.id):
+        payment_list = list(payments)
+        total_amount = sum(p.amount_paid for p in payment_list)
+        grouped_data.append({
+            'subscriber': payment_list[0].subscriber,
+            'total_amount': total_amount,
+            'payments': payment_list,
+        })
 
     return render(request, 'billing/grouped_ledger.html', {'grouped_data': grouped_data})
-
-
-
-
-
 
