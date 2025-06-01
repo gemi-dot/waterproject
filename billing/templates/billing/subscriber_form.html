@@ -1,31 +1,13 @@
-
 {% extends 'billing/base.html' %}
-{% load widget_tweaks %}
+
+{% block title %}Subscriber Form{% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-
-      <h2>{{ form_title }}</h2>
-
-      <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-          <div class="mb-3">
-            {{ field.label_tag }}
-            {{ field }}
-            {% if field.errors %}
-              <div class="text-danger small">{{ field.errors }}</div>
-            {% endif %}
-          </div>
-        {% endfor %}
-
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="{% url 'subscriber_list' %}" class="btn btn-secondary">Cancel</a>
-      </form>
-
-    </div>
-  </div>
-</div>
+<h2>{{ form_title|default:"Add/Edit Subscriber" }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Save</button>
+    <a href="{% url 'subscriber_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
 {% endblock %}

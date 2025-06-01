@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
   
     'django_extensions',
+    'django.contrib.humanize',
 ]
 
 
@@ -62,7 +63,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         
         'APP_DIRS': True,
         'OPTIONS': {

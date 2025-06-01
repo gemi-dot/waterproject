@@ -1,0 +1,30 @@
+{% extends 'billing/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Ledger Payments Grouped by Subscriber</h2>
+    <hr>
+
+    {% for subscriber, entries in grouped_ledgers.items %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>{{ subscriber.name }}</strong> — {{ subscriber.barangay }}
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for entry in entries %}
+                        <li class="list-group-item">
+                            ₱{{ entry.amount_paid }} on {{ entry.date_paid|date:"F j, Y" }}
+                            {% if entry.water_bill %}
+                                (Water Bill: {{ entry.water_bill.billing_month|date:"F Y" }})
+                            {% endif %}
+                            {% if entry.remarks %}
+                                - {{ entry.remarks }}
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

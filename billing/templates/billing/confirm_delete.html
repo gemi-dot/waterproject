@@ -1,16 +1,12 @@
 {% extends 'billing/base.html' %}
 
-{% block content %}
-<div class="container mt-5">
-  <div class="alert alert-warning">
-    <h4>Confirm Delete</h4>
-    <p>Are you sure you want to delete <strong>{{ subscriber.name }}</strong>?</p>
+{% block title %}Confirm Delete{% endblock %}
 
-    <form method="post">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger">Yes, delete</button>
-      <a href="{% url 'subscriber_list' %}" class="btn btn-secondary">Cancel</a>
-    </form>
-  </div>
-</div>
+{% block content %}
+<h2>Are you sure you want to delete this {{ type|default:"item" }}?</h2>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+    <a href="javascript:history.back()" class="btn btn-secondary">Cancel</a>
+</form>
 {% endblock %}

@@ -1,26 +1,31 @@
-<h2>Payment History</h2>
-<a href="{% url 'add_ledger_entry' %}">Add Payment</a>
-<table>
-  <tr>
-    <th>Subscriber</th>
-    <th>Date Paid</th>
-    <th>Amount</th>
-    <th>Remarks</th>
-    <th>Water Bill</th>
-  </tr>
-  {% for entry in ledgers %}
-  <tr>
-    <td>{{ entry.subscriber.name }}</td>
-    <td>{{ entry.date_paid }}</td>
-    <td>{{ entry.amount_paid }}</td>
-    <td>{{ entry.remarks }}</td>
-    <td>
-      {% if entry.water_bill %}
-        {{ entry.water_bill.billing_month }}
-      {% else %}
-        N/A
-      {% endif %}
-    </td>
-  </tr>
-  {% endfor %}
+{% extends 'billing/base.html' %}
+
+{% block title %}Ledger{% endblock %}
+
+{% block content %}
+<h2>Ledger Entries</h2>
+<a href="{% url 'add_ledger_entry' %}" class="btn btn-primary mb-3">Add Payment</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Subscriber</th>
+            <th>Water Bill</th>
+            <th>Date Paid</th>
+            <th>Amount Paid</th>
+            <th>Remarks</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in ledgers %}
+        <tr>
+            <td>{{ entry.subscriber.name }}</td>
+            <td>{{ entry.water_bill }}</td>
+            <td>{{ entry.date_paid }}</td>
+            <td>{{ entry.amount_paid }}</td>
+            <td>{{ entry.remarks }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
+{% endblock %}

@@ -2,46 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Water Billing System</title>
+    <title>{% block title %}Water Billing System{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">WaterPay</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-  <div class="container-fluid">
-    
-    <a class="navbar-brand" href="{% url 'subscriber_list' %}">WaterBilling</a>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'subscriber_list' %}">Subscribers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'waterbill_list' %}">Water Bills</a>
+                    </li>
+                    
+                    <!-- Ledger Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="ledgerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Ledger
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="ledgerDropdown">
+                            <li><a class="dropdown-item" href="{% url 'ledger_list' %}">Ledger List</a></li>
+                            <li><a class="dropdown-item" href="{% url 'grouped_ledger' %}">Grouped Ledger</a></li>
+                        </ul>
+                    </li>
 
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'subscriber_list' %}">Subscribers</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'waterbill_list' %}">Water Bills</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'ledger_list' %}">Ledger</a>
-        </li>
-      </ul>
+    <!-- Page Content -->
+    <div class="container">
+        {% block content %}
+        <!-- Child templates inject content here -->
+        {% endblock %}
     </div>
-  </div>
-</nav>
 
-<div class="container mt-4">
-    {% block content %}
-    <!-- Content goes here -->
-    {% endblock %}
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

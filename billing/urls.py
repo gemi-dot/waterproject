@@ -19,6 +19,11 @@ urlpatterns = [
     path('ledger/', views.ledger_list, name='ledger_list'),
     path('ledger/add/', views.add_ledger_entry, name='add_ledger_entry'),
 
+    path('ledger/<int:subscriber_id>/', views.subscriber_ledger, name='subscriber_ledger'),
+    path('ledger/grouped/', views.grouped_ledger_view, name='grouped_ledger'),
+    
+    
+
 
 
 ]
