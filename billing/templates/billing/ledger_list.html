@@ -1,31 +1,32 @@
 {% extends 'billing/base.html' %}
 
-{% block title %}Ledger{% endblock %}
-
 {% block content %}
-<h2>Ledger Entries</h2>
-<a href="{% url 'add_ledger_entry' %}" class="btn btn-primary mb-3">Add Payment</a>
-
-<table class="table table-bordered">
-    <thead>
+<div class="container mt-4">
+  <h2>All Ledger Entries</h2>
+  <hr>
+  {% if ledgers %}
+    <table class="table table-bordered table-striped">
+      <thead class="table-light">
         <tr>
-            <th>Subscriber</th>
-            <th>Water Bill</th>
-            <th>Date Paid</th>
-            <th>Amount Paid</th>
-            <th>Remarks</th>
+          <th>Date Paid</th>
+          <th>Subscriber</th>
+          <th class="text-end">Amount Paid (₱)</th>
+          <th>Remarks</th>
         </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
         {% for entry in ledgers %}
-        <tr>
+          <tr>
+            <td>{{ entry.date_paid|date:"F j, Y" }}</td>
             <td>{{ entry.subscriber.name }}</td>
-            <td>{{ entry.water_bill }}</td>
-            <td>{{ entry.date_paid }}</td>
-            <td>{{ entry.amount_paid }}</td>
+            <td class="text-end">{{ entry.amount_paid|floatformat:2 }}</td>
             <td>{{ entry.remarks }}</td>
-        </tr>
+          </tr>
         {% endfor %}
-    </tbody>
-</table>
+      </tbody>
+    </table>
+  {% else %}
+    <p>No ledger entries found.</p>
+  {% endif %}
+</div>
 {% endblock %}

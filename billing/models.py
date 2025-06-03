@@ -41,12 +41,11 @@ class LedgerEntry(models.Model):
 
 
 class SubscriberLedger(models.Model):
-    """Payment record linked to subscriber and optionally to a water bill."""
     subscriber = models.ForeignKey(Subscriber, on_delete=models.CASCADE)
-    water_bill = models.ForeignKey(WaterBill, on_delete=models.SET_NULL, null=True, blank=True)
+    water_bill = models.ForeignKey(WaterBill, on_delete=models.CASCADE, null=True, blank=True)
     date_paid = models.DateField()
     amount_paid = models.DecimalField(max_digits=8, decimal_places=2)
-    remarks = models.CharField(max_length=255, blank=True, null=True)
+    remarks = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.subscriber.name} paid {self.amount_paid} on {self.date_paid}"
+        return f"{self.subscriber} - {self.date_paid} - ₱{self.amount_paid}"

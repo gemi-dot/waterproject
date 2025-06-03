@@ -1,21 +1,22 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from decimal import Decimal
+from django.db.models import Sum, Q
 
 from .forms import SubscriberForm, WaterBillForm, SubscriberLedgerForm
 from .models import Subscriber, WaterBill, SubscriberLedger
 
-from itertools import groupby
-from operator import attrgetter
 
-from django.db.models import Sum
+from django.db.models.functions import TruncMonth
 
 
 def home(request):
     return render(request, 'billing/home.html')
 
 
+# -------------------
 # Subscriber Views
+# -------------------
 
 def subscriber_list(request):
     query = request.GET.get('q')
@@ -64,7 +65,9 @@ def delete_subscriber(request, pk):
     return render(request, 'billing/confirm_delete.html', {'object': subscriber, 'type': 'Subscriber'})
 
 
+# -------------------
 # WaterBill Views
+# -------------------
 
 def waterbill_list(request):
     bills = WaterBill.objects.all().order_by('-billing_month')
@@ -108,12 +111,9 @@ def delete_water_bill(request, pk):
     return render(request, 'billing/confirm_delete.html', {'object': bill, 'type': 'Water Bill'})
 
 
+# -------------------
 # Ledger Views
-
-def ledger_list(request):
-    ledgers = SubscriberLedger.objects.select_related('subscriber', 'water_bill').order_by('-date_paid')
-    return render(request, 'billing/ledger_list.html', {'ledgers': ledgers})
-
+# -------------------
 
 def add_ledger_entry(request):
     if request.method == 'POST':
@@ -123,34 +123,77 @@ def add_ledger_entry(request):
             return redirect('ledger_list')
     else:
         form = SubscriberLedgerForm()
-    return render(request, 'billing/ledger_form.html', {'form': form, 'form_title': 'Add Payment'})
+    return render(request, 'billing/add_ledger_entry.html', {'form': form})
 
 
 def subscriber_ledger(request, subscriber_id):
     subscriber = get_object_or_404(Subscriber, pk=subscriber_id)
     bills = WaterBill.objects.filter(subscriber=subscriber).order_by('billing_month')
-    return render(request, 'billing/ledger_list.html', {'subscriber': subscriber, 'bills': bills})
+    payments = SubscriberLedger.objects.filter(subscriber=subscriber).order_by('-date_paid')
 
+    total_due = bills.aggregate(Sum('amount_due'))['amount_due__sum'] or 0
+    total_paid = payments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+    balance = total_due - total_paid
+
+    context = {
+        'subscriber': subscriber,
+        'bills': bills,
+        'payments': payments,
+        'total_due': total_due,
+        'total_paid': total_paid,
+        'balance': balance,
+    }
+    return render(request, 'billing/subscriber_ledger.html', context)
+
+
+def grouped_ledger(request):
+    ledgers = SubscriberLedger.objects.all().order_by('subscriber__barangay', 'subscriber__name')
+    context = {'ledgers': ledgers}
+    return render(request, 'billing/grouped_ledger.html', context)
+
+
+
+
+def ledger_list(request):
+    subscriber_name = request.GET.get('subscriber_name', '').strip()
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+
+    ledgers = SubscriberLedger.objects.all().order_by('-date_paid')
+
+    if subscriber_name:
+        ledgers = ledgers.filter(subscriber__name__icontains=subscriber_name)
+    if date_from:
+        ledgers = ledgers.filter(date_paid__gte=date_from)
+    if date_to:
+        ledgers = ledgers.filter(date_paid__lte=date_to)
+
+    context = {
+        'ledgers': ledgers,
+        'subscriber_name': subscriber_name,
+        'date_from': date_from,
+        'date_to': date_to,
+    }
+    return render(request, 'billing/ledger_list.html', context)
+
+
+
+# views.py
 
 
 def grouped_ledger_view(request):
-    # Get all subscribers with their payments
-    subscribers = SubscriberLedger.objects.select_related('subscriber').order_by('subscriber__name', '-date_paid')
+    subscribers = Subscriber.objects.all().order_by('barangay', 'name')
+    ledger_data = []
 
-    # Group payments by subscriber id
-    from itertools import groupby
-    # groupby requires the list to be sorted by subscriber id
-    subscribers = sorted(subscribers, key=lambda x: x.subscriber.id)
-    
-    grouped_data = []
-    for subscriber_id, payments in groupby(subscribers, key=lambda x: x.subscriber.id):
-        payment_list = list(payments)
-        total_amount = sum(p.amount_paid for p in payment_list)
-        grouped_data.append({
-            'subscriber': payment_list[0].subscriber,
-            'total_amount': total_amount,
-            'payments': payment_list,
-        })
+    for subscriber in subscribers:
+        entries = SubscriberLedger.objects.filter(subscriber=subscriber).order_by('-date_paid')
+        total_paid = entries.aggregate(total=Sum('amount_paid'))['total'] or 0
 
-    return render(request, 'billing/grouped_ledger.html', {'grouped_data': grouped_data})
+        if entries.exists():
+            ledger_data.append({
+                'subscriber': subscriber,
+                'entries': entries,
+                'total_paid': total_paid
+            })
 
+    return render(request, 'billing/grouped_ledger.html', {'ledger_data': ledger_data})

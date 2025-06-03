@@ -2,48 +2,45 @@
 {% extends 'billing/base.html' %}
 
 {% block content %}
-<h2>Grouped Ledger with Payment Details</h2>
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary">Grouped Ledger by Subscriber</h2>
 
-<table border="1" cellpadding="5" cellspacing="0" style="width:100%;">
-  <thead>
-    <tr>
-      <th>Subscriber</th>
-      <th>Total Payments (₱)</th>
-      <th>Details</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for group in grouped_data %}
-      <tr>
-        <td>{{ group.subscriber.name }}</td>
-        <td style="text-align:right;">{{ group.total_amount|floatformat:2 }}</td>
-        <td>
-          <table border="1" cellpadding="3" cellspacing="0" style="width:100%;">
-            <thead>
-              <tr>
-                <th>Date Paid</th>
-                <th>Amount Paid (₱)</th>
-                <th>Remarks</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for payment in group.payments %}
-              <tr>
-                <td>{{ payment.date_paid }}</td>
-                <td style="text-align:right;">{{ payment.amount_paid|floatformat:2 }}</td>
-                <td>{{ payment.remarks|default:"-" }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </td>
-      </tr>
+    {% for group in ledger_data %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <strong>{{ group.subscriber.name }}</strong> —
+                {{ group.subscriber.barangay }}<br>
+                <small class="text-white-50">{{ group.subscriber.address }}</small>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-bordered table-sm mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date Paid</th>
+                            <th>Water Bill</th>
+                            <th>Amount Paid</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in group.entries %}
+                            <tr>
+                                <td>{{ entry.date_paid }}</td>
+                                <td>{{ entry.water_bill.billing_month }}</td>
+                                <td>₱{{ entry.amount_paid }}</td>
+                                <td>{{ entry.remarks }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="table-success fw-bold">
+                            <td colspan="2" class="text-end">Total Paid:</td>
+                            <td colspan="2">₱{{ group.total_paid }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     {% empty %}
-      <tr>
-        <td colspan="3">No payment records found.</td>
-      </tr>
+        <div class="alert alert-warning">No ledger entries found.</div>
     {% endfor %}
-  </tbody>
-</table>
-
+</div>
 {% endblock %}

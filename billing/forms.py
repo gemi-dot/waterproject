@@ -18,13 +18,21 @@ class WaterBillForm(forms.ModelForm):
             'billing_month': forms.DateInput(attrs={'type': 'date'}),
             'due_date': forms.DateInput(attrs={'type': 'date'}),
         }
+def clean_consumption(self):
+        value = self.cleaned_data['consumption']
+        if value <= 0:
+            raise forms.ValidationError("Consumption must be greater than zero.")
+        return value
+
+
 
 class SubscriberLedgerForm(forms.ModelForm):
     class Meta:
         model = SubscriberLedger
         fields = ['subscriber', 'water_bill', 'date_paid', 'amount_paid', 'remarks']
 
-        widgets = {
-            'date_paid': forms.DateInput(attrs={'type': 'date'}),
-            'remarks': forms.Textarea(attrs={'rows': 2}),
-        }
+ 
+
+        
+
+
